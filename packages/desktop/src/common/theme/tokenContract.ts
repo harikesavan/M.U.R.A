@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 AionUi (aionui.com)
+ * Copyright 2025 Mura (mura.com)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -105,6 +105,13 @@ export const THEME_TOKENS: readonly ThemeTokenDescriptor[] = [
   { key: '--fill-0', group: 'special', scope: 'appearance-scoped', description: 'Fill 0 (translucent in dark)' },
   { key: '--dialog-fill-0', group: 'special', scope: 'appearance-scoped', description: 'Dialog fill' },
   { key: '--inverse', group: 'special', scope: 'appearance-invariant', description: 'Inverse (always white)' },
+
+  // M.U.R.A start page
+  { key: '--mura-bg', group: 'background', scope: 'appearance-scoped', description: 'M.U.R.A start-page background' },
+  { key: '--mura-composer', group: 'component', scope: 'appearance-scoped', description: 'M.U.R.A composer surface' },
+  { key: '--mura-text-primary', group: 'text', scope: 'appearance-scoped', description: 'M.U.R.A start-page primary text' },
+  { key: '--mura-text-secondary', group: 'text', scope: 'appearance-scoped', description: 'M.U.R.A start-page secondary text' },
+  { key: '--mura-accent', group: 'brand', scope: 'appearance-scoped', description: 'M.U.R.A start-page accent' },
 ] as const;
 
 /** Set of every overridable token key, for O(1) validation (module-private). */

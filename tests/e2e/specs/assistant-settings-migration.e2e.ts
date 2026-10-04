@@ -2,7 +2,7 @@
  * Assistant Settings Migration — phase-1 governance E2E coverage.
  *
  * These tests exercise a real upgrade path:
- * 1. seed a legacy `aionui.db` using the pre-unification assistants schema
+ * 1. seed a legacy `mura.db` using the pre-unification assistants schema
  * 2. start the current backend against that data dir
  * 3. verify phase-1 assistant fields and overlays are materialized correctly
  */
@@ -70,7 +70,7 @@ type AssistantDetail = {
 function resolveBackendBinary(): string {
   const projectRoot = process.cwd();
   const candidates = [
-    process.env.AIONUI_BACKEND_BINARY,
+    process.env.MURA_BACKEND_BINARY,
     path.join(projectRoot, '../aionCore/target/debug/aioncore'),
     path.join(os.homedir(), '.cargo', 'bin', 'aioncore'),
   ].filter((value): value is string => Boolean(value));
@@ -85,16 +85,16 @@ function resolveBackendBinary(): string {
 }
 
 function schemaPath(): string {
-  return path.join(process.cwd(), '../aionCore/crates/aionui-db/migrations/001_initial_schema.sql');
+  return path.join(process.cwd(), '../aionCore/crates/mura-db/migrations/001_initial_schema.sql');
 }
 
 function querySqliteValue(dataDir: string, sql: string): string {
-  const dbPath = path.join(dataDir, 'aionui-backend.db');
+  const dbPath = path.join(dataDir, 'mura-backend.db');
   return execFileSync('sqlite3', ['-readonly', dbPath, sql], { encoding: 'utf8' }).trim();
 }
 
 function seedLegacyDatabase(dataDir: string): void {
-  const legacyDbPath = path.join(dataDir, 'aionui.db');
+  const legacyDbPath = path.join(dataDir, 'mura.db');
   const schemaSql = fs.readFileSync(schemaPath(), 'utf8');
   execFileSync('sqlite3', [legacyDbPath], { input: schemaSql, encoding: 'utf8' });
 
@@ -198,7 +198,7 @@ test.describe('Assistant Settings Migration', () => {
       env: {
         ...process.env,
         RUST_LOG: 'warn',
-        AIONUI_EXTENSIONS_PATH: path.join(process.cwd(), 'examples'),
+        MURA_EXTENSIONS_PATH: path.join(process.cwd(), 'examples'),
       },
     });
     try {
@@ -210,7 +210,7 @@ test.describe('Assistant Settings Migration', () => {
   }
 
   test.beforeEach(async () => {
-    dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aionui-assistant-migration-'));
+    dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mura-assistant-migration-'));
     seedLegacyDatabase(dataDir);
     await startBackend();
   });

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 AionUi (aionui.com)
+ * Copyright 2025 Mura (mura.com)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -239,10 +239,10 @@ describe('MarkdownViewer', () => {
   });
 
   it('keeps remote links as browser anchors', () => {
-    render(<MarkdownViewer content='[docs](https://aionui.com/docs)' />);
+    render(<MarkdownViewer content='[docs](https://mura.com/docs)' />);
 
     const link = screen.getByRole('link', { name: 'docs' });
-    expect(link).toHaveAttribute('href', 'https://aionui.com/docs');
+    expect(link).toHaveAttribute('href', 'https://mura.com/docs');
   });
 
   it('sanitizes raw HTML in preview mode (drops <script>, keeps benign markup)', () => {

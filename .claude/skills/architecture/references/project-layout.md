@@ -6,7 +6,6 @@
 
 - **Workspace root stays minimal**: root keeps shared config, scripts, tests, docs, assets, and package manager files.
 - **Desktop app source lives under `packages/desktop/`**: do not add new app runtime code back to the root.
-- **README translations** → `docs/readme/`, not root. Only main `readme.md` stays at root.
 - **Guide documents** (`*_GUIDE.md`, `CODE_STYLE.md`) → `docs/`
 - **Build artifacts** (`out/`, `node_modules/`) are gitignored
 

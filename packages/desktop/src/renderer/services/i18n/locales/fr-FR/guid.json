@@ -13,5 +13,21 @@
     "specifyWorkspace": "Sélectionnez le dossier du projet",
     "searchPlaceholder": "Rechercher des projets…",
     "noProject": "Aucun projet"
+  },
+  "startPage": {
+    "greeting": "Hi, {{name}}.",
+    "subtitle": "What's on your mind?",
+    "composerPlaceholder": "Start anywhere…",
+    "starters": {
+      "untangle": "Untangle a thought",
+      "plan": "Make a plan",
+      "research": "Research something"
+    },
+    "starterPrompts": {
+      "untangle": "Help me untangle a thought. Here is what is on my mind:\n\n",
+      "plan": "Help me make a plan for:\n\n",
+      "research": "Research this for me and summarize what matters:\n\n"
+    },
+    "resumeLabel": "Continue where you left off"
   }
 }

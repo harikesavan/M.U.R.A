@@ -6,7 +6,6 @@ Rules for organizing files and directories across the entire Electron project.
 
 ### Root Directory Rules
 
-- **README translations** belong in `docs/readme/`, not at root. Only the main `readme.md` stays at root (GitHub convention)
 - **Guide documents** (deployment, testing, WebUI, CDP, etc.) belong in `docs/guides/`
 - **Contributor documentation** (dev setup, code style, file structure, PR workflow) belongs in `docs/contributing/`
 - **Architecture documentation** belongs in `docs/architecture/` (research notes under `docs/architecture/research/`)
@@ -14,15 +13,9 @@ Rules for organizing files and directories across the entire Electron project.
 - **Config files** (`tsconfig.json`, `package.json`, etc.) stay at root — Node.js/Electron ecosystem convention
 - **New documentation** should be placed under the appropriate `docs/` subdirectory, not at project root
 
-### Current Root Cleanup Targets
-
-| Action                                     | Files                              |
-| ------------------------------------------ | ---------------------------------- |
-| Move readme translations to `docs/readme/` | `readme_{ch,es,jp,ko,pt,tr,tw}.md` |
-
 ## Project Layout (`src/`)
 
-AionUi is a multi-process Electron app with three core layers: **renderer**, **main process**, and **preload/shared**.
+Mura is a multi-process Electron app with three core layers: **renderer**, **main process**, and **preload/shared**.
 
 ### Target Structure
 
@@ -246,7 +239,7 @@ src/renderer/
 
 ```
 src/renderer/components/
-├── base/           # UI primitives — AionModal, AionSelect, FlexFullContainer, etc.
+├── base/           # UI primitives — MuraModal, MuraSelect, FlexFullContainer, etc.
 ├── chat/           # Conversation/message domain (example, not exhaustive)
 ├── agent/          # Agent selection/configuration domain
 ├── settings/       # Settings domain

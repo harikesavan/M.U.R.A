@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 AionUi (aionui.com)
+ * Copyright 2025 Mura (mura.com)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -31,7 +31,7 @@ export type LegacyDatabaseMigrationResult = {
 };
 
 export function resolveLegacyDatabasePath(dataDir = getDataPath()): string {
-  return path.join(dataDir, 'aionui.db');
+  return path.join(dataDir, 'mura.db');
 }
 
 function ensureSystemUser(db: ISqliteDriver): void {

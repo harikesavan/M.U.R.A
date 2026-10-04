@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 AionUi (aionui.com)
+ * Copyright 2025 Mura (mura.com)
  * SPDX-License-Identifier: Apache-2.0
  *
  * The plan bar is a LIVE progress view, not history. It must render only while

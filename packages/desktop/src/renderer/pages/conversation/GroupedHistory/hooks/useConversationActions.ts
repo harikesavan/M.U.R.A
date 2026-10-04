@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 AionUi (aionui.com)
+ * Copyright 2025 Mura (mura.com)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -250,7 +250,7 @@ export const useConversationActions = ({
   );
 
   /**
-   * Archive-project state — rendered via AionModal in the GroupedHistory component.
+   * Archive-project state — rendered via MuraModal in the GroupedHistory component.
    * The left panel groups conversations by workspace folder (not by a bound
    * project record), so there is no project id to hand the `archiveProject`
    * endpoint. Archiving the group therefore archives each conversation in it —

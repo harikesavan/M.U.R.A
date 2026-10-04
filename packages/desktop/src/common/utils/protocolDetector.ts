@@ -1,12 +1,12 @@
 /**
  * @license
- * Copyright 2025 AionUi (aionui.com)
+ * Copyright 2025 Mura (mura.com)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 /**
- * AionRouter 协议检测器
- * Protocol Detector for AionRouter
+ * MuraRouter 协议检测器
+ * Protocol Detector for MuraRouter
  *
  * 支持自动检测 API 端点使用的协议类型：
  * - OpenAI 协议（大多数第三方服务）

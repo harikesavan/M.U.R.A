@@ -1,11 +1,11 @@
 /**
  * @license
- * Copyright 2025 AionUi (aionui.com)
+ * Copyright 2025 Mura (mura.com)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 /**
- * AionUi 基础组件库统一导出 / AionUi base components unified exports
+ * Mura 基础组件库统一导出 / Mura base components unified exports
  *
  * 提供所有基础组件和类型的统一导出入口
  * Provides unified export entry for all base components and types
@@ -13,37 +13,37 @@
 
 // ==================== 组件导出 / Component Exports ====================
 
-export { default as AionModal } from './AionModal';
-export { default as AionCollapse } from './AionCollapse';
-export { default as AionSelect } from './AionSelect';
-export { default as AionScrollArea } from './AionScrollArea';
-export { default as AionSteps } from './AionSteps';
-export { default as AionSearchInput } from './AionSearchInput';
-export { default as AionInlineSearchInput } from './AionInlineSearchInput';
+export { default as MuraModal } from './MuraModal';
+export { default as MuraCollapse } from './MuraCollapse';
+export { default as MuraSelect } from './MuraSelect';
+export { default as MuraScrollArea } from './MuraScrollArea';
+export { default as MuraSteps } from './MuraSteps';
+export { default as MuraSearchInput } from './MuraSearchInput';
+export { default as MuraInlineSearchInput } from './MuraInlineSearchInput';
 
 // ==================== 类型导出 / Type Exports ====================
 
-// AionModal 类型 / AionModal types
+// MuraModal 类型 / MuraModal types
 export type {
   ModalSize,
   ModalHeaderConfig,
   ModalFooterConfig,
   ModalContentStyleConfig,
-  AionModalProps,
-} from './AionModal';
-export { MODAL_SIZES } from './AionModal';
+  MuraModalProps,
+} from './MuraModal';
+export { MODAL_SIZES } from './MuraModal';
 
-// AionCollapse 类型 / AionCollapse types
-export type { AionCollapseProps, AionCollapseItemProps } from './AionCollapse';
+// MuraCollapse 类型 / MuraCollapse types
+export type { MuraCollapseProps, MuraCollapseItemProps } from './MuraCollapse';
 
-// AionSelect 类型 / AionSelect types
-export type { AionSelectProps } from './AionSelect';
+// MuraSelect 类型 / MuraSelect types
+export type { MuraSelectProps } from './MuraSelect';
 
-// AionSteps 类型 / AionSteps types
-export type { AionStepsProps } from './AionSteps';
+// MuraSteps 类型 / MuraSteps types
+export type { MuraStepsProps } from './MuraSteps';
 
-// AionSearchInput 类型 / AionSearchInput types
-export type { AionSearchInputProps } from './AionSearchInput';
+// MuraSearchInput 类型 / MuraSearchInput types
+export type { MuraSearchInputProps } from './MuraSearchInput';
 
-// AionInlineSearchInput 类型 / AionInlineSearchInput types
-export type { AionInlineSearchInputProps } from './AionInlineSearchInput';
+// MuraInlineSearchInput 类型 / MuraInlineSearchInput types
+export type { MuraInlineSearchInputProps } from './MuraInlineSearchInput';

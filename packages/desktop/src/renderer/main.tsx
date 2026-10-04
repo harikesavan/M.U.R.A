@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 AionUi (aionui.com)
+ * Copyright 2025 Mura (mura.com)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -75,6 +75,7 @@ import { useTranslation } from 'react-i18next';
 
 // Styles
 import 'uno.css';
+import './styles/fonts.css';
 import './styles/arco-override.css';
 import './styles/themes/index.css';
 import './styles/markdown.css';
@@ -153,7 +154,7 @@ const completeArcoLocale = (locale: ArcoLocaleInput): typeof enUS => ({
   ColorPicker: locale.ColorPicker ?? enUS.ColorPicker,
 });
 
-// Every language AionUi ships that Arco publishes a locale for. Arco has no
+// Every language Mura ships that Arco publishes a locale for. Arco has no
 // uk-UA or fa-IR locale; those fall back to English component strings.
 const arcoLocales: Record<string, typeof enUS> = {
   'zh-CN': zhCN,
@@ -187,10 +188,10 @@ function captureRuntimeInstallationIntegrityFailure(event: IRuntimeStatusEvent):
   void import('@sentry/electron/renderer')
     .then((Sentry) => {
       Sentry.withScope((scope) => {
-        scope.setTag('aionui.installation_integrity', event.failure_kind ?? 'unknown');
-        scope.setTag('aionui.runtime_resource', event.resource);
-        scope.setTag('aionui.runtime_resource_id', event.resource_id ?? '');
-        scope.setTag('aionui.runtime_scope', event.scope.kind);
+        scope.setTag('mura.installation_integrity', event.failure_kind ?? 'unknown');
+        scope.setTag('mura.runtime_resource', event.resource);
+        scope.setTag('mura.runtime_resource_id', event.resource_id ?? '');
+        scope.setTag('mura.runtime_scope', event.scope.kind);
         Sentry.captureMessage('runtime-installation-integrity-failure', 'error');
       });
     })

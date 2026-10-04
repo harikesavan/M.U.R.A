@@ -1,4 +1,4 @@
-# AionUi Docs
+# Mura Docs
 
 Documentation is organized by reader intent, not by document type.
 
@@ -9,7 +9,6 @@ Documentation is organized by reader intent, not by document type.
 | [`architecture/`](architecture) | Engineers & architects   | System architecture overview, subsystem deep-dives (ACP, queue, team mode), and supporting research notes.                    |
 | [`specs/`](specs)               | Engineering-driven specs | Feature design docs, requirements, implementation plans (ACP rewrite, extension market, remote agent, wake prompt, PR notes). |
 | [`prds/`](prds)                 | Product team             | Formal Product Requirement Documents maintained by the product team. **Do not reorganize without their consent.**             |
-| [`readme/`](readme)             | Global users             | Translated copies of the root `readme.md` (Chinese, Japanese, Korean, Spanish, etc.).                                         |
 
 ## Quick pointers
 
@@ -28,4 +27,3 @@ Documentation is organized by reader intent, not by document type.
 | Exploratory research, analysis reports                     | `architecture/research/`    |
 | Feature requirements / design drafts driven by engineering | `specs/<feature-name>/`     |
 | Formal PRD owned by product team                           | `prds/` (coordinate first)  |
-| README translation                                         | `readme/readme_<locale>.md` |

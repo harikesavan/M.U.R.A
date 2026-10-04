@@ -1,4 +1,4 @@
-import AionSelect from '@/renderer/components/base/AionSelect';
+import MuraSelect from '@/renderer/components/base/MuraSelect';
 import type { SelectHandle } from '@arco-design/web-react/es/Select/interface';
 import React, { useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,21 +29,21 @@ const LanguageSwitcher: React.FC = () => {
 
   return (
     <div className='flex items-center gap-8px'>
-      <AionSelect ref={selectRef} className='w-160px' value={i18n.language} onChange={handleLanguageChange}>
-        <AionSelect.Option value='zh-CN'>简体中文</AionSelect.Option>
-        <AionSelect.Option value='zh-TW'>繁體中文</AionSelect.Option>
-        <AionSelect.Option value='ja-JP'>日本語</AionSelect.Option>
-        <AionSelect.Option value='ko-KR'>한국어</AionSelect.Option>
-        <AionSelect.Option value='tr-TR'>Türkçe</AionSelect.Option>
-        <AionSelect.Option value='ru-RU'>Русский</AionSelect.Option>
-        <AionSelect.Option value='uk-UA'>Українська</AionSelect.Option>
-        <AionSelect.Option value='pt-BR'>Português (BR)</AionSelect.Option>
-        <AionSelect.Option value='de-DE'>Deutsch</AionSelect.Option>
-        <AionSelect.Option value='es-ES'>Español</AionSelect.Option>
-        <AionSelect.Option value='fr-FR'>Français</AionSelect.Option>
-        <AionSelect.Option value='fa-IR'>فارسی</AionSelect.Option>
-        <AionSelect.Option value='en-US'>English</AionSelect.Option>
-      </AionSelect>
+      <MuraSelect ref={selectRef} className='w-160px' value={i18n.language} onChange={handleLanguageChange}>
+        <MuraSelect.Option value='zh-CN'>简体中文</MuraSelect.Option>
+        <MuraSelect.Option value='zh-TW'>繁體中文</MuraSelect.Option>
+        <MuraSelect.Option value='ja-JP'>日本語</MuraSelect.Option>
+        <MuraSelect.Option value='ko-KR'>한국어</MuraSelect.Option>
+        <MuraSelect.Option value='tr-TR'>Türkçe</MuraSelect.Option>
+        <MuraSelect.Option value='ru-RU'>Русский</MuraSelect.Option>
+        <MuraSelect.Option value='uk-UA'>Українська</MuraSelect.Option>
+        <MuraSelect.Option value='pt-BR'>Português (BR)</MuraSelect.Option>
+        <MuraSelect.Option value='de-DE'>Deutsch</MuraSelect.Option>
+        <MuraSelect.Option value='es-ES'>Español</MuraSelect.Option>
+        <MuraSelect.Option value='fr-FR'>Français</MuraSelect.Option>
+        <MuraSelect.Option value='fa-IR'>فارسی</MuraSelect.Option>
+        <MuraSelect.Option value='en-US'>English</MuraSelect.Option>
+      </MuraSelect>
     </div>
   );
 };

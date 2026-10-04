@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 AionUi (aionui.com)
+ * Copyright 2025 Mura (mura.com)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -20,6 +20,9 @@ import AssistantSelectionArea from './components/AssistantSelectionArea';
 import GuidActionRow from './components/GuidActionRow';
 import GuidInputCard from './components/GuidInputCard';
 import GuidModelSelector from './components/GuidModelSelector';
+import GuidResumeEntry from './components/GuidResumeEntry';
+import GuidStarterActions from './components/GuidStarterActions';
+import MuraPresence from './components/MuraPresence';
 import QuickActionButtons from './components/QuickActionButtons';
 import FeedbackReportModal from '@/renderer/components/settings/SettingsModal/contents/FeedbackReportModal';
 import { useGuidAssistantSelection } from './hooks/useGuidAssistantSelection';
@@ -669,7 +672,9 @@ const GuidPage: React.FC = () => {
       <div ref={guidContainerRef} className={styles.guidContainer}>
         <div className={styles.guidLayout}>
           <div className={styles.heroHeader}>
-            <p className='text-2xl font-semibold mb-0 text-t-primary text-center'>{t('conversation.welcome.title')}</p>
+            <MuraPresence size={160} className={styles.muraPresence} />
+            <p className={styles.greeting}>{t('guid.startPage.greeting', { name: 'Hari' })}</p>
+            <p className={styles.subtitle}>{t('guid.startPage.subtitle')}</p>
           </div>
 
           <AssistantSelectionArea
@@ -702,6 +707,15 @@ const GuidPage: React.FC = () => {
             onSelectWorkspace={(dir) => guidInput.setDir(dir)}
             onClearWorkspace={() => guidInput.setDir('')}
           />
+
+          <GuidStarterActions
+            onSelect={(prompt) => {
+              guidInput.setInput(prompt);
+              guidInput.handleTextareaFocus();
+            }}
+          />
+
+          <GuidResumeEntry />
 
           {selectedAssistantPrompts.length > 0 ? (
             <div className='mt-18px w-full animate-fade-in ps-20px'>

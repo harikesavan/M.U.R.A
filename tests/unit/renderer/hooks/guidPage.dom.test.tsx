@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 AionUi (aionui.com)
+ * Copyright 2025 Mura (mura.com)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -17,6 +17,7 @@ const {
   capturedGuidActionRowProps,
   capturedAssistantSelectionAreaProps,
   capturedGuidInputCardProps,
+  capturedGuidStarterActionsProps,
   capturedGuidSendDeps,
   resolveGuidAssistantDefaultsMock,
   sendMock,
@@ -111,6 +112,7 @@ const {
   capturedGuidActionRowProps: [] as Array<Record<string, unknown>>,
   capturedAssistantSelectionAreaProps: [] as Array<Record<string, unknown>>,
   capturedGuidInputCardProps: [] as Array<Record<string, unknown>>,
+  capturedGuidStarterActionsProps: [] as Array<Record<string, unknown>>,
   capturedGuidSendDeps: [] as Array<Record<string, unknown>>,
   resolveGuidAssistantDefaultsMock: vi.fn(() => ({
     disabledBuiltinSkillIds: [],
@@ -213,6 +215,21 @@ vi.mock('@/renderer/pages/guid/components/QuickActionButtons', () => ({
   default: () => <div data-testid='guid-quick-actions' />,
 }));
 
+vi.mock('@/renderer/pages/guid/components/MuraPresence', () => ({
+  default: () => <div data-testid='mura-presence' />,
+}));
+
+vi.mock('@/renderer/pages/guid/components/GuidStarterActions', () => ({
+  default: (props: Record<string, unknown>) => {
+    capturedGuidStarterActionsProps.push(props);
+    return <div data-testid='guid-starter-actions' />;
+  },
+}));
+
+vi.mock('@/renderer/pages/guid/components/GuidResumeEntry', () => ({
+  default: () => <div data-testid='guid-resume-entry' />,
+}));
+
 vi.mock('@/renderer/components/settings/SettingsModal/contents/FeedbackReportModal', () => ({
   default: () => null,
 }));
@@ -279,7 +296,7 @@ vi.mock('swr', async () => {
 import GuidPage from '@/renderer/pages/guid/GuidPage';
 
 const guidInputCardProps = {
-  input: 'Existing Guid draft\nCreate with /cron in AionUi',
+  input: 'Existing Guid draft\nCreate with /cron in Mura',
   onInputChange: vi.fn(),
   onKeyDown: vi.fn(),
   onPaste: vi.fn(),
@@ -309,6 +326,7 @@ describe('GuidPage', () => {
     capturedGuidActionRowProps.length = 0;
     capturedAssistantSelectionAreaProps.length = 0;
     capturedGuidInputCardProps.length = 0;
+    capturedGuidStarterActionsProps.length = 0;
     capturedGuidSendDeps.length = 0;
     useGuidAssistantSelectionMock.mockClear();
     resolveGuidAssistantDefaultsMock.mockReturnValue({
@@ -380,7 +398,7 @@ describe('GuidPage', () => {
 
   it('appends a draft-preserving prefill without clearing attachments or workspace', () => {
     locationMock.state = {
-      prefillPrompt: 'Create with /cron in AionUi',
+      prefillPrompt: 'Create with /cron in Mura',
       preservePrefillDraft: true,
       focusPrefill: true,
       returnTo: 'conversation-sidebar',
@@ -393,7 +411,7 @@ describe('GuidPage', () => {
 
     const inputUpdater = guidInputMock.setInput.mock.calls[0]?.[0];
     expect(inputUpdater).toBeTypeOf('function');
-    expect(inputUpdater('Existing Guid draft')).toBe('Existing Guid draft\nCreate with /cron in AionUi');
+    expect(inputUpdater('Existing Guid draft')).toBe('Existing Guid draft\nCreate with /cron in Mura');
     expect(guidInputMock.setFiles).not.toHaveBeenCalled();
     expect(guidInputMock.setDir).not.toHaveBeenCalled();
     expect(capturedGuidInputCardProps.at(-1)?.focusRequestKey).toBe('guid-location');
@@ -417,7 +435,7 @@ describe('GuidPage', () => {
 
   it('removes a consumed preserved prefill even when no other navigation state remains', () => {
     locationMock.state = {
-      prefillPrompt: 'Create with /cron in AionUi',
+      prefillPrompt: 'Create with /cron in Mura',
       preservePrefillDraft: true,
       focusPrefill: true,
     };
@@ -432,7 +450,8 @@ describe('GuidPage', () => {
 
     expect(screen.queryByLabelText('common.back')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Assistant Details')).not.toBeInTheDocument();
-    expect(screen.getByText('conversation.welcome.title')).toBeInTheDocument();
+    expect(screen.getByText('guid.startPage.greeting')).toBeInTheDocument();
+    expect(screen.getByText('guid.startPage.subtitle')).toBeInTheDocument();
     expect(screen.getByTestId('assistant-selection-area')).toBeInTheDocument();
     const latestAssistantSelectionAreaProps = capturedAssistantSelectionAreaProps.at(-1);
     const latestGuidActionRowProps = capturedGuidActionRowProps.at(-1);

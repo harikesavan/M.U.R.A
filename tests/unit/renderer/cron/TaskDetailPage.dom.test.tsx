@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 AionUi (aionui.com)
+ * Copyright 2025 Mura (mura.com)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -32,7 +32,7 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
-// TaskDetailPage renders CreateTaskDialog, which now mounts through AionModal
+// TaskDetailPage renders CreateTaskDialog, which now mounts through MuraModal
 // and reads ThemeContext for font scaling. Provide a minimal theme so it mounts
 // without a full ThemeProvider (which pulls in IPC-backed theme loading).
 vi.mock('@/renderer/hooks/context/ThemeContext', () => ({

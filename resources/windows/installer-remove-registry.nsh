@@ -1,50 +1,50 @@
-!ifndef AIONUI_INSTALLER_REMOVE_REGISTRY_NSH
-!define AIONUI_INSTALLER_REMOVE_REGISTRY_NSH
+!ifndef MURA_INSTALLER_REMOVE_REGISTRY_NSH
+!define MURA_INSTALLER_REMOVE_REGISTRY_NSH
 
-!macro AIONUI_CLEAR_INSTALL_REGISTRY _REASON
+!macro MURA_CLEAR_INSTALL_REGISTRY _REASON
   DeleteRegKey SHCTX "${UNINSTALL_REGISTRY_KEY}"
   DeleteRegKey SHCTX "${INSTALL_REGISTRY_KEY}"
-  !insertmacro AIONUI_LOG_EVENT "event=registry-clear reason=${_REASON} uninstallKey=${UNINSTALL_REGISTRY_KEY} installKey=${INSTALL_REGISTRY_KEY}"
+  !insertmacro MURA_LOG_EVENT "event=registry-clear reason=${_REASON} uninstallKey=${UNINSTALL_REGISTRY_KEY} installKey=${INSTALL_REGISTRY_KEY}"
 !macroend
 
-!macro AIONUI_LOG_ATOMIC_REMOVE_FAILURE
+!macro MURA_LOG_ATOMIC_REMOVE_FAILURE
   Push $9
   nsExec::Exec `"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -Command "& { \
     $$ErrorActionPreference = 'SilentlyContinue'; \
-    $$log = '$AionUiSessionLogPath'; \
-    if (-not $$log) { $$log = Join-Path $$env:TEMP '${AIONUI_FALLBACK_LOG}' }; \
-    $$failed = '$AionUiAtomicFailedPath'; \
+    $$log = '$MuraSessionLogPath'; \
+    if (-not $$log) { $$log = Join-Path $$env:TEMP '${MURA_FALLBACK_LOG}' }; \
+    $$failed = '$MuraAtomicFailedPath'; \
     $$instDir = '$INSTDIR'; \
-    $$oldInstallDir = '$AionUiAtomicStagingDir'; \
+    $$oldInstallDir = '$MuraAtomicStagingDir'; \
     $$relative = $$failed; \
     if ($$failed.StartsWith($$instDir, [System.StringComparison]::CurrentCultureIgnoreCase)) { $$relative = $$failed.Substring($$instDir.Length).TrimStart('\') }; \
     $$tempCandidate = if ($$relative -and $$relative -ne $$failed) { Join-Path $$oldInstallDir $$relative } else { '' }; \
     $$kind = if ($$tempCandidate.Length -ge 260) { 'likely-long-path' } else { 'unknown' }; \
-    $$payload = [ordered]@{ schemaVersion = 1; ts = (Get-Date -Format o); session = '$AionUiSessionId'; version = '${VERSION}'; arch = '${AIONUI_TARGET_ARCH}'; updated = ('$AionUiIsUpdated' -eq '1'); instDir = '$INSTDIR'; event = 'remove-atomic-failed'; kind = $$kind; pathLength = $$failed.Length; tempCandidateLength = $$tempCandidate.Length; atomicFailedPath = $$failed; tempCandidate = $$tempCandidate }; \
+    $$payload = [ordered]@{ schemaVersion = 1; ts = (Get-Date -Format o); session = '$MuraSessionId'; version = '${VERSION}'; arch = '${MURA_TARGET_ARCH}'; updated = ('$MuraIsUpdated' -eq '1'); instDir = '$INSTDIR'; event = 'remove-atomic-failed'; kind = $$kind; pathLength = $$failed.Length; tempCandidateLength = $$tempCandidate.Length; atomicFailedPath = $$failed; tempCandidate = $$tempCandidate }; \
     Add-Content -LiteralPath $$log -Encoding UTF8 -Value ($$payload | ConvertTo-Json -Compress -Depth 8) \
   }"`
   Pop $9
   Pop $9
 !macroend
 
-!macro AIONUI_LOG_REMOVE_FAILURE_JSON _PHASE _FATAL _FAILED_PATH _EXTRA_FIELDS
-  !insertmacro AIONUI_LOG_JSON_EVENT "failure" "$$lockerText = '$AionUiLockerList'; $$processes = @(); if ($$lockerText -and $$lockerText -notlike 'Windows did not identify*' -and $$lockerText -ne 'unknown process') { $$processes = @($$lockerText -split ',\s*' | Where-Object { $$_ } | ForEach-Object { if ($$_ -match '^(.*)\(([0-9]+)\)$$') { [ordered]@{ name = $$Matches[1]; pid = [int]$$Matches[2] } } else { [ordered]@{ name = $$_; pid = $$null } } }) }; $$payload.code = '${AIONUI_E_INSTALL_DIR_REMOVE_OR_LOCKED}'; $$payload.phase = '${_PHASE}'; $$payload.failedPath = '${_FAILED_PATH}'; $$payload.blockingProcesses = @($$processes); if ($$lockerText -like 'AionUi installer(*)') { $$payload.fallbackReason = 'installer-self-lock'; $$payload.message = 'The installer process is using the install directory as its current output directory.' } elseif ($$processes.Count -eq 0) { $$payload.fallbackReason = 'restart-manager-no-process'; $$payload.message = 'Windows did not identify a specific locking process. Close terminals, editors, and file managers opened in the install folder.' } else { $$payload.fallbackReason = ''; $$payload.message = '' }; $$payload.fatal = ('${_FATAL}' -eq '1'); ${_EXTRA_FIELDS}"
+!macro MURA_LOG_REMOVE_FAILURE_JSON _PHASE _FATAL _FAILED_PATH _EXTRA_FIELDS
+  !insertmacro MURA_LOG_JSON_EVENT "failure" "$$lockerText = '$MuraLockerList'; $$processes = @(); if ($$lockerText -and $$lockerText -notlike 'Windows did not identify*' -and $$lockerText -ne 'unknown process') { $$processes = @($$lockerText -split ',\s*' | Where-Object { $$_ } | ForEach-Object { if ($$_ -match '^(.*)\(([0-9]+)\)$$') { [ordered]@{ name = $$Matches[1]; pid = [int]$$Matches[2] } } else { [ordered]@{ name = $$_; pid = $$null } } }) }; $$payload.code = '${MURA_E_INSTALL_DIR_REMOVE_OR_LOCKED}'; $$payload.phase = '${_PHASE}'; $$payload.failedPath = '${_FAILED_PATH}'; $$payload.blockingProcesses = @($$processes); if ($$lockerText -like 'Mura installer(*)') { $$payload.fallbackReason = 'installer-self-lock'; $$payload.message = 'The installer process is using the install directory as its current output directory.' } elseif ($$processes.Count -eq 0) { $$payload.fallbackReason = 'restart-manager-no-process'; $$payload.message = 'Windows did not identify a specific locking process. Close terminals, editors, and file managers opened in the install folder.' } else { $$payload.fallbackReason = ''; $$payload.message = '' }; $$payload.fatal = ('${_FATAL}' -eq '1'); ${_EXTRA_FIELDS}"
 !macroend
 
-!macro AIONUI_REMOVE_INSTALL_DIR
-  StrCpy $AionUiRemoveResidueCount "0"
-  ${If} $AionUiRemoveResidueRoot == ""
-    StrCpy $AionUiRemoveResidueRoot "$INSTDIR"
+!macro MURA_REMOVE_INSTALL_DIR
+  StrCpy $MuraRemoveResidueCount "0"
+  ${If} $MuraRemoveResidueRoot == ""
+    StrCpy $MuraRemoveResidueRoot "$INSTDIR"
   ${EndIf}
-  StrCpy $AionUiRemoveFirstFailedPath ""
+  StrCpy $MuraRemoveFirstFailedPath ""
   nsExec::Exec `"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -Command "& { \
     $$ErrorActionPreference = 'Continue'; \
-    $$log = '$AionUiSessionLogPath'; \
-    if (-not $$log) { $$log = Join-Path $$env:TEMP '${AIONUI_FALLBACK_LOG}' }; \
-    $$path = [System.IO.Path]::GetFullPath('$AionUiRemoveResidueRoot'); \
-    $$firstFailedFile = '$PLUGINSDIR\aionui-remove-first-failed.txt'; \
+    $$log = '$MuraSessionLogPath'; \
+    if (-not $$log) { $$log = Join-Path $$env:TEMP '${MURA_FALLBACK_LOG}' }; \
+    $$path = [System.IO.Path]::GetFullPath('$MuraRemoveResidueRoot'); \
+    $$firstFailedFile = '$PLUGINSDIR\mura-remove-first-failed.txt'; \
     Set-Content -LiteralPath $$firstFailedFile -Encoding UTF8 -NoNewline -Value ''; \
-    function Write-InstallerLog($$message) { $$payload = [ordered]@{ schemaVersion = 1; ts = (Get-Date -Format o); session = '$AionUiSessionId'; version = '${VERSION}'; arch = '${AIONUI_TARGET_ARCH}'; updated = ('$AionUiIsUpdated' -eq '1'); instDir = '$INSTDIR'; event = 'remove-log'; message = $$message }; if ($$message -match '(^|\s)event=([^\s]+)') { $$payload.event = $$Matches[2] }; Add-Content -LiteralPath $$log -Encoding UTF8 -Value ($$payload | ConvertTo-Json -Compress -Depth 8) } \
+    function Write-InstallerLog($$message) { $$payload = [ordered]@{ schemaVersion = 1; ts = (Get-Date -Format o); session = '$MuraSessionId'; version = '${VERSION}'; arch = '${MURA_TARGET_ARCH}'; updated = ('$MuraIsUpdated' -eq '1'); instDir = '$INSTDIR'; event = 'remove-log'; message = $$message }; if ($$message -match '(^|\s)event=([^\s]+)') { $$payload.event = $$Matches[2] }; Add-Content -LiteralPath $$log -Encoding UTF8 -Value ($$payload | ConvertTo-Json -Compress -Depth 8) } \
     function Convert-LongPath($$itemPath) { if ($$itemPath.StartsWith('\\')) { return '\\?\UNC\' + $$itemPath.TrimStart('\') } return '\\?\' + $$itemPath } \
     function Remove-WithRetries($$item, $$isDir) { \
       $$delays = @(200,500,1000); \
@@ -73,123 +73,123 @@
       exit 1 \
     } \
   }"`
-  Pop $AionUiRemoveDirResult
+  Pop $MuraRemoveDirResult
 
   ClearErrors
   SetDetailsPrint none
-  FileOpen $AionUiRemoveFirstFailedFile "$PLUGINSDIR\aionui-remove-first-failed.txt" r
+  FileOpen $MuraRemoveFirstFailedFile "$PLUGINSDIR\mura-remove-first-failed.txt" r
   ${IfNot} ${Errors}
-    FileRead $AionUiRemoveFirstFailedFile $AionUiRemoveFirstFailedPath
-    FileClose $AionUiRemoveFirstFailedFile
+    FileRead $MuraRemoveFirstFailedFile $MuraRemoveFirstFailedPath
+    FileClose $MuraRemoveFirstFailedFile
   ${EndIf}
   SetDetailsPrint lastused
 
-  ${If} $AionUiRemoveDirResult == "error"
-    !insertmacro AIONUI_LOG_EVENT "event=remove-longpath fallback=RMDir reason=no-powershell root=$INSTDIR"
-    RMDir /r "$AionUiRemoveResidueRoot"
-    ${If} ${FileExists} "$AionUiRemoveResidueRoot\*.*"
-      StrCpy $AionUiRemoveDirResult "1"
+  ${If} $MuraRemoveDirResult == "error"
+    !insertmacro MURA_LOG_EVENT "event=remove-longpath fallback=RMDir reason=no-powershell root=$INSTDIR"
+    RMDir /r "$MuraRemoveResidueRoot"
+    ${If} ${FileExists} "$MuraRemoveResidueRoot\*.*"
+      StrCpy $MuraRemoveDirResult "1"
     ${Else}
-      StrCpy $AionUiRemoveDirResult "0"
+      StrCpy $MuraRemoveDirResult "0"
     ${EndIf}
   ${EndIf}
 
-  ${If} $AionUiRemoveDirResult != 0
-    StrCpy $AionUiRemoveResidueCount $AionUiRemoveDirResult
+  ${If} $MuraRemoveDirResult != 0
+    StrCpy $MuraRemoveResidueCount $MuraRemoveDirResult
   ${EndIf}
 !macroend
 
 !macro customRemoveFiles
-  !insertmacro AIONUI_LOG_EVENT "remove-start instDir=$INSTDIR"
-  Var /GLOBAL AionUiRemoveDirResult
-  Var /GLOBAL AionUiAtomicFailedPath
-  Var /GLOBAL AionUiAtomicRemoveSucceeded
-  Var /GLOBAL AionUiAtomicStagingDir
-  Var /GLOBAL AionUiRemoveResidueCount
-  Var /GLOBAL AionUiRemoveResidueRoot
-  Var /GLOBAL AionUiRemoveFirstFailedPath
-  Var /GLOBAL AionUiRemoveFirstFailedFile
-  StrCpy $AionUiAtomicFailedPath ""
-  StrCpy $AionUiAtomicRemoveSucceeded "0"
-  StrCpy $AionUiAtomicStagingDir ""
-  StrCpy $AionUiRemoveResidueCount "0"
-  StrCpy $AionUiRemoveResidueRoot "$INSTDIR"
-  StrCpy $AionUiRemoveFirstFailedPath ""
+  !insertmacro MURA_LOG_EVENT "remove-start instDir=$INSTDIR"
+  Var /GLOBAL MuraRemoveDirResult
+  Var /GLOBAL MuraAtomicFailedPath
+  Var /GLOBAL MuraAtomicRemoveSucceeded
+  Var /GLOBAL MuraAtomicStagingDir
+  Var /GLOBAL MuraRemoveResidueCount
+  Var /GLOBAL MuraRemoveResidueRoot
+  Var /GLOBAL MuraRemoveFirstFailedPath
+  Var /GLOBAL MuraRemoveFirstFailedFile
+  StrCpy $MuraAtomicFailedPath ""
+  StrCpy $MuraAtomicRemoveSucceeded "0"
+  StrCpy $MuraAtomicStagingDir ""
+  StrCpy $MuraRemoveResidueCount "0"
+  StrCpy $MuraRemoveResidueRoot "$INSTDIR"
+  StrCpy $MuraRemoveFirstFailedPath ""
 
   SetOutPath $TEMP
-  StrCpy $AionUiCurrentOutDir "$TEMP"
+  StrCpy $MuraCurrentOutDir "$TEMP"
 
   ${if} ${isUpdated}
-    StrCpy $AionUiAtomicStagingDir "$INSTDIR.__old"
-    ${If} ${FileExists} "$AionUiAtomicStagingDir\*.*"
-      StrCpy $AionUiRemoveResidueRoot "$AionUiAtomicStagingDir"
-      !insertmacro AIONUI_LOG_EVENT "remove-stale-staging start root=$AionUiRemoveResidueRoot"
-      !insertmacro AIONUI_REMOVE_INSTALL_DIR
-      StrCpy $AionUiRemoveResidueRoot "$INSTDIR"
+    StrCpy $MuraAtomicStagingDir "$INSTDIR.__old"
+    ${If} ${FileExists} "$MuraAtomicStagingDir\*.*"
+      StrCpy $MuraRemoveResidueRoot "$MuraAtomicStagingDir"
+      !insertmacro MURA_LOG_EVENT "remove-stale-staging start root=$MuraRemoveResidueRoot"
+      !insertmacro MURA_REMOVE_INSTALL_DIR
+      StrCpy $MuraRemoveResidueRoot "$INSTDIR"
     ${EndIf}
 
-    aionui_retry_atomic_rename:
+    mura_retry_atomic_rename:
       ClearErrors
-      Rename "$INSTDIR" "$AionUiAtomicStagingDir"
+      Rename "$INSTDIR" "$MuraAtomicStagingDir"
     ${if} ${Errors}
       DetailPrint "Atomic update cleanup failed before replacing previous installation: $INSTDIR"
-      StrCpy $AionUiAtomicFailedPath "$INSTDIR"
-      !insertmacro AIONUI_LOG_ATOMIC_REMOVE_FAILURE
-      !insertmacro AIONUI_CAPTURE_FAILED_PATH_LOCKERS "$AionUiAtomicFailedPath"
+      StrCpy $MuraAtomicFailedPath "$INSTDIR"
+      !insertmacro MURA_LOG_ATOMIC_REMOVE_FAILURE
+      !insertmacro MURA_CAPTURE_FAILED_PATH_LOCKERS "$MuraAtomicFailedPath"
       ${IfNot} ${Silent}
-        !insertmacro AIONUI_PROMPT_FAILED_PATH_LOCKERS "$AionUiAtomicFailedPath" "atomic-failed" aionui_retry_atomic_rename aionui_cancel_atomic_rename aionui_continue_atomic_failed
-        aionui_cancel_atomic_rename:
+        !insertmacro MURA_PROMPT_FAILED_PATH_LOCKERS "$MuraAtomicFailedPath" "atomic-failed" mura_retry_atomic_rename mura_cancel_atomic_rename mura_continue_atomic_failed
+        mura_cancel_atomic_rename:
       ${EndIf}
-      aionui_continue_atomic_failed:
-      !insertmacro AIONUI_LOG_REMOVE_FAILURE_JSON "atomic-failed" "1" "$AionUiAtomicFailedPath" "$$payload.atomicFailedPath = '$AionUiAtomicFailedPath'"
-      !insertmacro AIONUI_LOG_EVENT "code=${AIONUI_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=atomic-failed fatal=1 degraded=none firstFailed=$AionUiAtomicFailedPath atomicFailedPath=$AionUiAtomicFailedPath"
-      !insertmacro AIONUI_CLEAR_INSTALL_REGISTRY "remove-failed-before-quit"
-      !insertmacro AIONUI_FAIL_REPORTABLE_BILINGUAL ${AIONUI_E_INSTALL_DIR_REMOVE_OR_LOCKED} "event=session-end result=fail code=${AIONUI_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=atomic-failed fatal=1 firstFailed=$AionUiAtomicFailedPath lockers=$AionUiLockerList" "${AIONUI_MSG_REPLACE_LOCKED_EN}" "${AIONUI_MSG_REPLACE_LOCKED_ZH}" "${AIONUI_MSG_CLOSE_SHOWN_FILE_ACTION_EN}" "${AIONUI_MSG_CLOSE_SHOWN_FILE_ACTION_ZH}"
+      mura_continue_atomic_failed:
+      !insertmacro MURA_LOG_REMOVE_FAILURE_JSON "atomic-failed" "1" "$MuraAtomicFailedPath" "$$payload.atomicFailedPath = '$MuraAtomicFailedPath'"
+      !insertmacro MURA_LOG_EVENT "code=${MURA_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=atomic-failed fatal=1 degraded=none firstFailed=$MuraAtomicFailedPath atomicFailedPath=$MuraAtomicFailedPath"
+      !insertmacro MURA_CLEAR_INSTALL_REGISTRY "remove-failed-before-quit"
+      !insertmacro MURA_FAIL_REPORTABLE_BILINGUAL ${MURA_E_INSTALL_DIR_REMOVE_OR_LOCKED} "event=session-end result=fail code=${MURA_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=atomic-failed fatal=1 firstFailed=$MuraAtomicFailedPath lockers=$MuraLockerList" "${MURA_MSG_REPLACE_LOCKED_EN}" "${MURA_MSG_REPLACE_LOCKED_ZH}" "${MURA_MSG_CLOSE_SHOWN_FILE_ACTION_EN}" "${MURA_MSG_CLOSE_SHOWN_FILE_ACTION_ZH}"
     ${else}
-      !insertmacro AIONUI_LOG_EVENT "remove-atomic result=0 staging=$AionUiAtomicStagingDir"
-      StrCpy $AionUiAtomicRemoveSucceeded "1"
-      StrCpy $AionUiRemoveResidueRoot "$AionUiAtomicStagingDir"
+      !insertmacro MURA_LOG_EVENT "remove-atomic result=0 staging=$MuraAtomicStagingDir"
+      StrCpy $MuraAtomicRemoveSucceeded "1"
+      StrCpy $MuraRemoveResidueRoot "$MuraAtomicStagingDir"
     ${endif}
   ${endif}
 
-  aionui_retry_remove_install_dir:
-    !insertmacro AIONUI_REMOVE_INSTALL_DIR
-  ${if} $AionUiRemoveDirResult != 0
-    !insertmacro AIONUI_CAPTURE_FAILED_PATH_LOCKERS "$AionUiRemoveFirstFailedPath"
-    ${if} $AionUiAtomicRemoveSucceeded == "1"
+  mura_retry_remove_install_dir:
+    !insertmacro MURA_REMOVE_INSTALL_DIR
+  ${if} $MuraRemoveDirResult != 0
+    !insertmacro MURA_CAPTURE_FAILED_PATH_LOCKERS "$MuraRemoveFirstFailedPath"
+    ${if} $MuraAtomicRemoveSucceeded == "1"
       ${IfNot} ${Silent}
-        !insertmacro AIONUI_PROMPT_FAILED_PATH_LOCKERS "$AionUiRemoveFirstFailedPath" "residual-delete-failed" aionui_retry_remove_install_dir aionui_cancel_remove_after_rm aionui_continue_after_rm
-        aionui_cancel_remove_after_rm:
-          !insertmacro AIONUI_LOG_REMOVE_FAILURE_JSON "residual-delete-failed" "1" "$AionUiRemoveFirstFailedPath" "$$payload.residueRoot = '$AionUiRemoveResidueRoot'; $$payload.failedCount = '$AionUiRemoveResidueCount'; $$payload.removeDirResult = '$AionUiRemoveDirResult'; $$payload.atomicSucceeded = ('$AionUiAtomicRemoveSucceeded' -eq '1')"
-          !insertmacro AIONUI_LOG_EVENT "code=${AIONUI_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=residual-delete-failed userAction=cancel fatal=1 residueRoot=$AionUiRemoveResidueRoot failedCount=$AionUiRemoveResidueCount firstFailed=$AionUiRemoveFirstFailedPath removeDirResult=$AionUiRemoveDirResult removeResidueCount=$AionUiRemoveResidueCount atomicFailedPath=$AionUiAtomicFailedPath atomicSucceeded=$AionUiAtomicRemoveSucceeded"
-          !insertmacro AIONUI_FAIL_REPORTABLE_BILINGUAL ${AIONUI_E_INSTALL_DIR_REMOVE_OR_LOCKED} "event=session-end result=fail code=${AIONUI_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=residual-delete-failed userAction=cancel fatal=1 firstFailed=$AionUiRemoveFirstFailedPath lockers=$AionUiLockerList" "${AIONUI_MSG_PREVIOUS_FILE_OPEN_EN}" "${AIONUI_MSG_PREVIOUS_FILE_OPEN_ZH}" "${AIONUI_MSG_CLOSE_SHOWN_FILE_ACTION_EN}" "${AIONUI_MSG_CLOSE_SHOWN_FILE_ACTION_ZH}"
+        !insertmacro MURA_PROMPT_FAILED_PATH_LOCKERS "$MuraRemoveFirstFailedPath" "residual-delete-failed" mura_retry_remove_install_dir mura_cancel_remove_after_rm mura_continue_after_rm
+        mura_cancel_remove_after_rm:
+          !insertmacro MURA_LOG_REMOVE_FAILURE_JSON "residual-delete-failed" "1" "$MuraRemoveFirstFailedPath" "$$payload.residueRoot = '$MuraRemoveResidueRoot'; $$payload.failedCount = '$MuraRemoveResidueCount'; $$payload.removeDirResult = '$MuraRemoveDirResult'; $$payload.atomicSucceeded = ('$MuraAtomicRemoveSucceeded' -eq '1')"
+          !insertmacro MURA_LOG_EVENT "code=${MURA_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=residual-delete-failed userAction=cancel fatal=1 residueRoot=$MuraRemoveResidueRoot failedCount=$MuraRemoveResidueCount firstFailed=$MuraRemoveFirstFailedPath removeDirResult=$MuraRemoveDirResult removeResidueCount=$MuraRemoveResidueCount atomicFailedPath=$MuraAtomicFailedPath atomicSucceeded=$MuraAtomicRemoveSucceeded"
+          !insertmacro MURA_FAIL_REPORTABLE_BILINGUAL ${MURA_E_INSTALL_DIR_REMOVE_OR_LOCKED} "event=session-end result=fail code=${MURA_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=residual-delete-failed userAction=cancel fatal=1 firstFailed=$MuraRemoveFirstFailedPath lockers=$MuraLockerList" "${MURA_MSG_PREVIOUS_FILE_OPEN_EN}" "${MURA_MSG_PREVIOUS_FILE_OPEN_ZH}" "${MURA_MSG_CLOSE_SHOWN_FILE_ACTION_EN}" "${MURA_MSG_CLOSE_SHOWN_FILE_ACTION_ZH}"
       ${EndIf}
-      aionui_continue_after_rm:
-      DetailPrint `AionUi previous installation had locked residual files; continuing after atomic cleanup succeeded: $INSTDIR`
-      !insertmacro AIONUI_LOG_EVENT "code=${AIONUI_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=residual-delete-failed degraded=continue fatal=0 residueRoot=$AionUiRemoveResidueRoot failedCount=$AionUiRemoveResidueCount firstFailed=$AionUiRemoveFirstFailedPath removeDirResult=$AionUiRemoveDirResult removeResidueCount=$AionUiRemoveResidueCount atomicFailedPath=$AionUiAtomicFailedPath atomicSucceeded=$AionUiAtomicRemoveSucceeded"
+      mura_continue_after_rm:
+      DetailPrint `Mura previous installation had locked residual files; continuing after atomic cleanup succeeded: $INSTDIR`
+      !insertmacro MURA_LOG_EVENT "code=${MURA_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=residual-delete-failed degraded=continue fatal=0 residueRoot=$MuraRemoveResidueRoot failedCount=$MuraRemoveResidueCount firstFailed=$MuraRemoveFirstFailedPath removeDirResult=$MuraRemoveDirResult removeResidueCount=$MuraRemoveResidueCount atomicFailedPath=$MuraAtomicFailedPath atomicSucceeded=$MuraAtomicRemoveSucceeded"
     ${else}
       DetailPrint `Can't safely remove previous installation without atomic cleanup proof: $INSTDIR`
       ${IfNot} ${Silent}
-        !insertmacro AIONUI_PROMPT_FAILED_PATH_LOCKERS "$AionUiRemoveFirstFailedPath" "residual-delete-failed-no-atomic-proof" aionui_retry_remove_install_dir aionui_cancel_remove_no_atomic aionui_continue_remove_no_atomic
-        aionui_cancel_remove_no_atomic:
+        !insertmacro MURA_PROMPT_FAILED_PATH_LOCKERS "$MuraRemoveFirstFailedPath" "residual-delete-failed-no-atomic-proof" mura_retry_remove_install_dir mura_cancel_remove_no_atomic mura_continue_remove_no_atomic
+        mura_cancel_remove_no_atomic:
       ${EndIf}
-      aionui_continue_remove_no_atomic:
-      !insertmacro AIONUI_LOG_REMOVE_FAILURE_JSON "residual-delete-failed-no-atomic-proof" "1" "$AionUiRemoveFirstFailedPath" "$$payload.residueRoot = '$AionUiRemoveResidueRoot'; $$payload.failedCount = '$AionUiRemoveResidueCount'; $$payload.removeDirResult = '$AionUiRemoveDirResult'; $$payload.atomicSucceeded = ('$AionUiAtomicRemoveSucceeded' -eq '1')"
-      !insertmacro AIONUI_LOG_EVENT "code=${AIONUI_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=residual-delete-failed-no-atomic-proof degraded=none fatal=1 residueRoot=$AionUiRemoveResidueRoot failedCount=$AionUiRemoveResidueCount firstFailed=$AionUiRemoveFirstFailedPath removeDirResult=$AionUiRemoveDirResult removeResidueCount=$AionUiRemoveResidueCount atomicFailedPath=$AionUiAtomicFailedPath atomicSucceeded=$AionUiAtomicRemoveSucceeded"
-      !insertmacro AIONUI_CLEAR_INSTALL_REGISTRY "remove-failed-before-quit"
-      !insertmacro AIONUI_FAIL_REPORTABLE_BILINGUAL ${AIONUI_E_INSTALL_DIR_REMOVE_OR_LOCKED} "event=session-end result=fail code=${AIONUI_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=residual-delete-failed-no-atomic-proof fatal=1 firstFailed=$AionUiRemoveFirstFailedPath removeDirResult=$AionUiRemoveDirResult lockers=$AionUiLockerList" "${AIONUI_MSG_REMOVE_PREVIOUS_DIR_EN}" "${AIONUI_MSG_REMOVE_PREVIOUS_DIR_ZH}" "${AIONUI_MSG_CLOSE_INSTALL_DIR_ACTION_EN}" "${AIONUI_MSG_CLOSE_INSTALL_DIR_ACTION_ZH}"
+      mura_continue_remove_no_atomic:
+      !insertmacro MURA_LOG_REMOVE_FAILURE_JSON "residual-delete-failed-no-atomic-proof" "1" "$MuraRemoveFirstFailedPath" "$$payload.residueRoot = '$MuraRemoveResidueRoot'; $$payload.failedCount = '$MuraRemoveResidueCount'; $$payload.removeDirResult = '$MuraRemoveDirResult'; $$payload.atomicSucceeded = ('$MuraAtomicRemoveSucceeded' -eq '1')"
+      !insertmacro MURA_LOG_EVENT "code=${MURA_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=residual-delete-failed-no-atomic-proof degraded=none fatal=1 residueRoot=$MuraRemoveResidueRoot failedCount=$MuraRemoveResidueCount firstFailed=$MuraRemoveFirstFailedPath removeDirResult=$MuraRemoveDirResult removeResidueCount=$MuraRemoveResidueCount atomicFailedPath=$MuraAtomicFailedPath atomicSucceeded=$MuraAtomicRemoveSucceeded"
+      !insertmacro MURA_CLEAR_INSTALL_REGISTRY "remove-failed-before-quit"
+      !insertmacro MURA_FAIL_REPORTABLE_BILINGUAL ${MURA_E_INSTALL_DIR_REMOVE_OR_LOCKED} "event=session-end result=fail code=${MURA_E_INSTALL_DIR_REMOVE_OR_LOCKED} phase=residual-delete-failed-no-atomic-proof fatal=1 firstFailed=$MuraRemoveFirstFailedPath removeDirResult=$MuraRemoveDirResult lockers=$MuraLockerList" "${MURA_MSG_REMOVE_PREVIOUS_DIR_EN}" "${MURA_MSG_REMOVE_PREVIOUS_DIR_ZH}" "${MURA_MSG_CLOSE_INSTALL_DIR_ACTION_EN}" "${MURA_MSG_CLOSE_INSTALL_DIR_ACTION_ZH}"
     ${endif}
   ${else}
-    !insertmacro AIONUI_LOG_EVENT "remove-final errors=0 instDir=$INSTDIR removeDirResult=$AionUiRemoveDirResult removeResidueCount=$AionUiRemoveResidueCount removeResidueRoot=$AionUiRemoveResidueRoot atomicFailedPath=$AionUiAtomicFailedPath atomicSucceeded=$AionUiAtomicRemoveSucceeded"
+    !insertmacro MURA_LOG_EVENT "remove-final errors=0 instDir=$INSTDIR removeDirResult=$MuraRemoveDirResult removeResidueCount=$MuraRemoveResidueCount removeResidueRoot=$MuraRemoveResidueRoot atomicFailedPath=$MuraAtomicFailedPath atomicSucceeded=$MuraAtomicRemoveSucceeded"
   ${endif}
 !macroend
 
 !macro customUnInit
-  !insertmacro AIONUI_LOG_EVENT "uninit instDir=$INSTDIR"
+  !insertmacro MURA_LOG_EVENT "uninit instDir=$INSTDIR"
 !macroend
 
 !macro customUnInstall
-  !insertmacro AIONUI_LOG_EVENT "uninstall-section start instDir=$INSTDIR"
+  !insertmacro MURA_LOG_EVENT "uninstall-section start instDir=$INSTDIR"
 !macroend
 
 !endif

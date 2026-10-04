@@ -1,21 +1,42 @@
 /**
  * @license
- * Copyright 2025 AionUi (aionui.com)
+ * Copyright 2025 Mura (mura.com)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const useSWRMock = vi.fn();
 const usePresetAssistantInfoMock = vi.fn();
 const getConversationOrNullMock = vi.fn();
+const requestConversationSendBoxPrefillMock = vi.fn();
+const navigateMock = vi.fn();
+const useConversationHistoryContextMock = vi.fn();
+
+const translations: Record<string, string> = {
+  'conversation.startPage.greeting': 'Hi, Hari.',
+  'conversation.startPage.supportingText': "What's on your mind?",
+  'conversation.startPage.untangle': 'Untangle a thought',
+  'conversation.startPage.untanglePrompt': 'Help me untangle this thought: ',
+  'conversation.startPage.makePlan': 'Make a plan',
+  'conversation.startPage.makePlanPrompt': 'Help me make a clear, realistic plan for: ',
+  'conversation.startPage.research': 'Research something',
+  'conversation.startPage.researchPrompt': 'Research this and explain what matters most: ',
+  'conversation.startPage.continue': 'Continue where you left off',
+  'conversation.startPage.presenceAlt': 'Mura',
+};
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (_key: string, options?: { defaultValue?: string }) => options?.defaultValue ?? _key,
+    t: (key: string, options?: { defaultValue?: string }) => translations[key] ?? options?.defaultValue ?? key,
   }),
+}));
+
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => navigateMock,
 }));
 
 vi.mock('swr', () => ({
@@ -35,6 +56,14 @@ vi.mock('@/renderer/pages/conversation/utils/conversationCache', () => ({
   getConversationOrNull: (...args: unknown[]) => getConversationOrNullMock(...args),
 }));
 
+vi.mock('@/renderer/hooks/chat/useSendBoxDraft', () => ({
+  requestConversationSendBoxPrefill: (...args: unknown[]) => requestConversationSendBoxPrefillMock(...args),
+}));
+
+vi.mock('@/renderer/hooks/context/ConversationHistoryContext', () => ({
+  useConversationHistoryContext: () => useConversationHistoryContextMock(),
+}));
+
 vi.mock('@renderer/utils/model/agentLogo', () => ({
   useAgentLogos: () => ({}),
   resolveAgentLogo: () => null,
@@ -48,9 +77,12 @@ describe('SingleChatEmptyState', () => {
     useSWRMock.mockReset();
     usePresetAssistantInfoMock.mockReset();
     getConversationOrNullMock.mockReset();
+    requestConversationSendBoxPrefillMock.mockReset();
+    navigateMock.mockReset();
+    useConversationHistoryContextMock.mockReturnValue({ conversations: [] });
   });
 
-  it('renders the greeting once the conversation record is available', () => {
+  it('renders Mura\'s calm personal greeting once the conversation record is available', () => {
     useSWRMock.mockReturnValue({
       data: { id: 'conv-1', type: 'acp', name: 'Some chat title', extra: { backend: 'claude' } },
     });
@@ -58,55 +90,58 @@ describe('SingleChatEmptyState', () => {
 
     render(<SingleChatEmptyState conversation_id='conv-1' />);
 
-    expect(screen.getByTestId('single-chat-empty-state-greeting')).toHaveTextContent(
-      'conversation.emptyState.greeting'
+    expect(screen.getByRole('heading', { name: 'Hi, Hari.' })).toBeInTheDocument();
+    expect(screen.getByText("What's on your mind?")).toBeInTheDocument();
+  });
+
+  it('prefills the existing composer without sending when a starter action is selected', async () => {
+    const user = userEvent.setup();
+    useSWRMock.mockReturnValue({
+      data: { id: 'conv-1', type: 'acp', name: 'Some chat title', extra: { backend: 'claude' } },
+    });
+    usePresetAssistantInfoMock.mockReturnValue({ info: null });
+
+    render(<SingleChatEmptyState conversation_id='conv-1' />);
+    await user.click(screen.getByRole('button', { name: 'Make a plan' }));
+
+    expect(requestConversationSendBoxPrefillMock).toHaveBeenCalledWith(
+      'conv-1',
+      'Help me make a clear, realistic plan for: '
     );
   });
 
-  it('prefers the explicit assistant_name prop over legacy runtime extra metadata', () => {
+  it('resumes the most recently modified real conversation other than the current empty chat', async () => {
+    const user = userEvent.setup();
     useSWRMock.mockReturnValue({
-      data: {
-        id: 'conv-1',
-        type: 'acp',
-        name: 'Some chat title',
-        extra: { agent_name: 'Legacy Runtime Name', backend: 'claude' },
-      },
+      data: { id: 'conv-current', type: 'acp', name: 'New Chat', extra: { backend: 'claude' } },
     });
     usePresetAssistantInfoMock.mockReturnValue({ info: null });
-
-    render(<SingleChatEmptyState conversation_id='conv-1' assistant_name='Assistant Prop Name' />);
-
-    expect(screen.getByText('Assistant Prop Name')).toBeInTheDocument();
-    expect(screen.queryByText('Legacy Runtime Name')).not.toBeInTheDocument();
-  });
-
-  it('falls back to legacy extra.agent_name when no preset/prop name is given', () => {
-    useSWRMock.mockReturnValue({
-      data: {
-        id: 'conv-1',
-        type: 'acp',
-        name: 'Some chat title',
-        extra: { agent_name: 'Legacy Runtime Name', backend: 'claude' },
-      },
+    useConversationHistoryContextMock.mockReturnValue({
+      conversations: [
+        { id: 'conv-current', name: 'New Chat', modified_at: 300 },
+        { id: 'conv-older', name: 'Older work', modified_at: 100 },
+        { id: 'conv-recent', name: 'Mura setup', modified_at: 200 },
+      ],
     });
-    usePresetAssistantInfoMock.mockReturnValue({ info: null });
 
-    render(<SingleChatEmptyState conversation_id='conv-1' />);
+    render(<SingleChatEmptyState conversation_id='conv-current' />);
+    await user.click(screen.getByRole('button', { name: /Continue where you left off.*Mura setup/ }));
 
-    expect(screen.getByText('Legacy Runtime Name')).toBeInTheDocument();
-    // The chat title is a summary of the first message, never the assistant identity.
-    expect(screen.queryByText('Some chat title')).not.toBeInTheDocument();
+    expect(navigateMock).toHaveBeenCalledWith('/conversation/conv-recent');
   });
 
-  it('uses the generic AI Assistant fallback when nothing else resolves', () => {
+  it('hides the resume entry when no other conversation exists', () => {
     useSWRMock.mockReturnValue({
       data: { id: 'conv-1', type: 'acp', name: 'Some chat title', extra: { backend: 'claude' } },
     });
     usePresetAssistantInfoMock.mockReturnValue({ info: null });
+    useConversationHistoryContextMock.mockReturnValue({
+      conversations: [{ id: 'conv-1', name: 'Some chat title', modified_at: 100 }],
+    });
 
     render(<SingleChatEmptyState conversation_id='conv-1' />);
 
-    expect(screen.getByText('AI Assistant')).toBeInTheDocument();
+    expect(screen.queryByText('Continue where you left off')).not.toBeInTheDocument();
   });
 
   it('renders nothing until the conversation record loads', () => {

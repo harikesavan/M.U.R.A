@@ -44,12 +44,12 @@ vi.mock('@/common', () => ({
   },
 }));
 
-vi.mock('@/renderer/components/base/AionModal', () => ({
+vi.mock('@/renderer/components/base/MuraModal', () => ({
   default: () => null,
 }));
 
 vi.mock('@/renderer/components/base', () => ({
-  AionSearchInput: () => null,
+  MuraSearchInput: () => null,
 }));
 
 import { useConversationShortcuts } from '@/renderer/hooks/ui/useConversationShortcuts';

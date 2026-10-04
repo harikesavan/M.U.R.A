@@ -1,19 +1,19 @@
-!ifndef AIONUI_INSTALLER_REPAIR_HEAL_NSH
-!define AIONUI_INSTALLER_REPAIR_HEAL_NSH
+!ifndef MURA_INSTALLER_REPAIR_HEAL_NSH
+!define MURA_INSTALLER_REPAIR_HEAL_NSH
 
-Var /GLOBAL AionUiRegistryInstallIsValid
-Var /GLOBAL AionUiInnerFailureSummary
-Var /GLOBAL AionUiInnerRootCode
-Var /GLOBAL AionUiInnerFailureReadResult
+Var /GLOBAL MuraRegistryInstallIsValid
+Var /GLOBAL MuraInnerFailureSummary
+Var /GLOBAL MuraInnerRootCode
+Var /GLOBAL MuraInnerFailureReadResult
 
-!macro AIONUI_READ_LAST_INNER_FAILURE
+!macro MURA_READ_LAST_INNER_FAILURE
   InitPluginsDir
-  StrCpy $AionUiInnerRootCode ""
-  StrCpy $AionUiInnerFailureSummary "No specific locking process was identified. Close AionUi, terminals, editors, and file managers opened in the install folder."
+  StrCpy $MuraInnerRootCode ""
+  StrCpy $MuraInnerFailureSummary "No specific locking process was identified. Close Mura, terminals, editors, and file managers opened in the install folder."
   nsExec::ExecToStack `"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -Command "& { \
     $$ErrorActionPreference = 'SilentlyContinue'; \
-    $$logPath = '$AionUiSessionLogPath'; \
-    $$summary = 'No specific locking process was identified. Close AionUi, terminals, editors, and file managers opened in the install folder.'; \
+    $$logPath = '$MuraSessionLogPath'; \
+    $$summary = 'No specific locking process was identified. Close Mura, terminals, editors, and file managers opened in the install folder.'; \
     $$code = ''; \
     if ($$logPath -and (Test-Path -LiteralPath $$logPath)) { \
       $$events = @(Get-Content -LiteralPath $$logPath -ErrorAction SilentlyContinue | ForEach-Object { try { $$_ | ConvertFrom-Json } catch { $$null } } | Where-Object { $$_ }); \
@@ -37,161 +37,161 @@ Var /GLOBAL AionUiInnerFailureReadResult
     if (-not $$code) { $$code = '-----' }; \
     [Console]::Out.Write($$code + '|' + $$summary) \
   }"`
-  Pop $AionUiInnerFailureReadResult
-  Pop $AionUiInnerFailureReadResult
-  StrCpy $AionUiInnerRootCode $AionUiInnerFailureReadResult 5
-  ${If} $AionUiInnerRootCode == "-----"
-    StrCpy $AionUiInnerRootCode ""
+  Pop $MuraInnerFailureReadResult
+  Pop $MuraInnerFailureReadResult
+  StrCpy $MuraInnerRootCode $MuraInnerFailureReadResult 5
+  ${If} $MuraInnerRootCode == "-----"
+    StrCpy $MuraInnerRootCode ""
   ${EndIf}
-  StrCpy $AionUiInnerFailureSummary $AionUiInnerFailureReadResult 4096 6
+  StrCpy $MuraInnerFailureSummary $MuraInnerFailureReadResult 4096 6
 !macroend
 
-!macro AIONUI_LOG_UNINSTALLER_REPAIR _PHASE
+!macro MURA_LOG_UNINSTALLER_REPAIR _PHASE
   nsExec::Exec `"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -Command "& { \
     $$ErrorActionPreference = 'SilentlyContinue'; \
-    $$log = '$AionUiSessionLogPath'; \
-    if (-not $$log) { $$log = Join-Path $$env:TEMP '${AIONUI_FALLBACK_LOG}' }; \
+    $$log = '$MuraSessionLogPath'; \
+    if (-not $$log) { $$log = Join-Path $$env:TEMP '${MURA_FALLBACK_LOG}' }; \
     $$path = '$INSTDIR\${UNINSTALL_FILENAME}'; \
     $$item = Get-Item -LiteralPath $$path -ErrorAction SilentlyContinue; \
     $$version = if ($$item) { $$item.VersionInfo.ProductVersion } else { '' }; \
     $$length = if ($$item) { $$item.Length } else { '' }; \
-    $$payload = [ordered]@{ schemaVersion = 1; ts = (Get-Date -Format o); session = '$AionUiSessionId'; version = '${VERSION}'; arch = '${AIONUI_TARGET_ARCH}'; updated = ('$AionUiIsUpdated' -eq '1'); instDir = '$INSTDIR'; event = 'uninstaller-repair'; phase = '${_PHASE}'; path = $$path; exists = [bool]$$item; productVersion = $$version; length = $$length }; \
+    $$payload = [ordered]@{ schemaVersion = 1; ts = (Get-Date -Format o); session = '$MuraSessionId'; version = '${VERSION}'; arch = '${MURA_TARGET_ARCH}'; updated = ('$MuraIsUpdated' -eq '1'); instDir = '$INSTDIR'; event = 'uninstaller-repair'; phase = '${_PHASE}'; path = $$path; exists = [bool]$$item; productVersion = $$version; length = $$length }; \
     Add-Content -LiteralPath $$log -Encoding UTF8 -Value ($$payload | ConvertTo-Json -Compress -Depth 8) \
   }"`
-  Pop $AionUiRepairLogResult
+  Pop $MuraRepairLogResult
 !macroend
 
-!macro AIONUI_REPAIR_INSTALLED_UNINSTALLER
-  Var /GLOBAL AionUiInstalledUninstaller
-  Var /GLOBAL AionUiBundledUninstaller
-  Var /GLOBAL AionUiRepairLogResult
+!macro MURA_REPAIR_INSTALLED_UNINSTALLER
+  Var /GLOBAL MuraInstalledUninstaller
+  Var /GLOBAL MuraBundledUninstaller
+  Var /GLOBAL MuraRepairLogResult
 
-  !insertmacro AIONUI_LOG_UNINSTALLER_REPAIR "before"
-  StrCpy $AionUiInstalledUninstaller "$INSTDIR\${UNINSTALL_FILENAME}"
+  !insertmacro MURA_LOG_UNINSTALLER_REPAIR "before"
+  StrCpy $MuraInstalledUninstaller "$INSTDIR\${UNINSTALL_FILENAME}"
 
   InitPluginsDir
-  StrCpy $AionUiBundledUninstaller "$PLUGINSDIR\AionUi-fixed-uninstaller.exe"
+  StrCpy $MuraBundledUninstaller "$PLUGINSDIR\Mura-fixed-uninstaller.exe"
   SetOverwrite on
-  File "/oname=$PLUGINSDIR\AionUi-fixed-uninstaller.exe" "${UNINSTALLER_OUT_FILE}"
+  File "/oname=$PLUGINSDIR\Mura-fixed-uninstaller.exe" "${UNINSTALLER_OUT_FILE}"
 
-  ${If} ${FileExists} "$AionUiInstalledUninstaller"
+  ${If} ${FileExists} "$MuraInstalledUninstaller"
     ClearErrors
-    CopyFiles /SILENT "$AionUiBundledUninstaller" "$AionUiInstalledUninstaller"
+    CopyFiles /SILENT "$MuraBundledUninstaller" "$MuraInstalledUninstaller"
     ${If} ${Errors}
-      !insertmacro AIONUI_LOG_UNINSTALLER_REPAIR "copy-failed-retry"
-      !insertmacro AIONUI_STOP_APP_PROCESSES
+      !insertmacro MURA_LOG_UNINSTALLER_REPAIR "copy-failed-retry"
+      !insertmacro MURA_STOP_APP_PROCESSES
       Sleep 1000
 
       ClearErrors
-      CopyFiles /SILENT "$AionUiBundledUninstaller" "$AionUiInstalledUninstaller"
+      CopyFiles /SILENT "$MuraBundledUninstaller" "$MuraInstalledUninstaller"
       ${If} ${Errors}
-        ${If} ${FileExists} "$AionUiBundledUninstaller"
-          !insertmacro AIONUI_LOG_UNINSTALLER_REPAIR "copy-failed-using-bundled"
-          !insertmacro AIONUI_LOG_EVENT "event=uninstaller-repair phase=copy-failed-using-bundled"
+        ${If} ${FileExists} "$MuraBundledUninstaller"
+          !insertmacro MURA_LOG_UNINSTALLER_REPAIR "copy-failed-using-bundled"
+          !insertmacro MURA_LOG_EVENT "event=uninstaller-repair phase=copy-failed-using-bundled"
         ${Else}
-          !insertmacro AIONUI_FAIL_REPORTABLE_BILINGUAL ${AIONUI_E_UNINSTALLER_COPY_OR_REBUILD_FAILED} "uninstaller-repair copy-failed-retry-bundled-missing" "${AIONUI_MSG_UNINSTALLER_COPY_LOCKED_EN}" "${AIONUI_MSG_UNINSTALLER_COPY_LOCKED_ZH}" "${AIONUI_MSG_UNINSTALLER_REPAIR_ACTION_EN}" "${AIONUI_MSG_UNINSTALLER_REPAIR_ACTION_ZH}"
+          !insertmacro MURA_FAIL_REPORTABLE_BILINGUAL ${MURA_E_UNINSTALLER_COPY_OR_REBUILD_FAILED} "uninstaller-repair copy-failed-retry-bundled-missing" "${MURA_MSG_UNINSTALLER_COPY_LOCKED_EN}" "${MURA_MSG_UNINSTALLER_COPY_LOCKED_ZH}" "${MURA_MSG_UNINSTALLER_REPAIR_ACTION_EN}" "${MURA_MSG_UNINSTALLER_REPAIR_ACTION_ZH}"
         ${EndIf}
       ${Else}
-        !insertmacro AIONUI_LOG_UNINSTALLER_REPAIR "after-copy-retry"
+        !insertmacro MURA_LOG_UNINSTALLER_REPAIR "after-copy-retry"
       ${EndIf}
     ${Else}
-      !insertmacro AIONUI_LOG_UNINSTALLER_REPAIR "after-copy"
+      !insertmacro MURA_LOG_UNINSTALLER_REPAIR "after-copy"
     ${EndIf}
   ${Else}
     ClearErrors
-    CopyFiles /SILENT "$AionUiBundledUninstaller" "$AionUiInstalledUninstaller"
+    CopyFiles /SILENT "$MuraBundledUninstaller" "$MuraInstalledUninstaller"
     ${If} ${Errors}
-      !insertmacro AIONUI_FAIL_REPORTABLE_BILINGUAL ${AIONUI_E_UNINSTALLER_COPY_OR_REBUILD_FAILED} "uninstaller-repair rebuild-failed" "${AIONUI_MSG_UNINSTALLER_REBUILD_FAILED_EN}" "${AIONUI_MSG_UNINSTALLER_REBUILD_FAILED_ZH}" "${AIONUI_MSG_UNINSTALLER_REPAIR_ACTION_EN}" "${AIONUI_MSG_UNINSTALLER_REPAIR_ACTION_ZH}"
+      !insertmacro MURA_FAIL_REPORTABLE_BILINGUAL ${MURA_E_UNINSTALLER_COPY_OR_REBUILD_FAILED} "uninstaller-repair rebuild-failed" "${MURA_MSG_UNINSTALLER_REBUILD_FAILED_EN}" "${MURA_MSG_UNINSTALLER_REBUILD_FAILED_ZH}" "${MURA_MSG_UNINSTALLER_REPAIR_ACTION_EN}" "${MURA_MSG_UNINSTALLER_REPAIR_ACTION_ZH}"
     ${EndIf}
 
-    ${IfNot} ${FileExists} "$AionUiInstalledUninstaller"
-      !insertmacro AIONUI_FAIL_REPORTABLE_BILINGUAL ${AIONUI_E_UNINSTALLER_COPY_OR_REBUILD_FAILED} "uninstaller-repair rebuild-missing-after-copy" "${AIONUI_MSG_UNINSTALLER_REBUILD_MISSING_EN}" "${AIONUI_MSG_UNINSTALLER_REBUILD_MISSING_ZH}" "${AIONUI_MSG_UNINSTALLER_REPAIR_ACTION_EN}" "${AIONUI_MSG_UNINSTALLER_REPAIR_ACTION_ZH}"
+    ${IfNot} ${FileExists} "$MuraInstalledUninstaller"
+      !insertmacro MURA_FAIL_REPORTABLE_BILINGUAL ${MURA_E_UNINSTALLER_COPY_OR_REBUILD_FAILED} "uninstaller-repair rebuild-missing-after-copy" "${MURA_MSG_UNINSTALLER_REBUILD_MISSING_EN}" "${MURA_MSG_UNINSTALLER_REBUILD_MISSING_ZH}" "${MURA_MSG_UNINSTALLER_REPAIR_ACTION_EN}" "${MURA_MSG_UNINSTALLER_REPAIR_ACTION_ZH}"
     ${EndIf}
 
-    !insertmacro AIONUI_LOG_UNINSTALLER_REPAIR "rebuilt"
-    !insertmacro AIONUI_LOG_EVENT "event=uninstaller-repair phase=rebuilt"
+    !insertmacro MURA_LOG_UNINSTALLER_REPAIR "rebuilt"
+    !insertmacro MURA_LOG_EVENT "event=uninstaller-repair phase=rebuilt"
   ${EndIf}
 !macroend
 
-!macro AIONUI_HEAL_INSTALL_REGISTRY
-  Var /GLOBAL AionUiRegInstallLocation
-  Var /GLOBAL AionUiRegUninstallString
-  Var /GLOBAL AionUiRegInstallExe
+!macro MURA_HEAL_INSTALL_REGISTRY
+  Var /GLOBAL MuraRegInstallLocation
+  Var /GLOBAL MuraRegUninstallString
+  Var /GLOBAL MuraRegInstallExe
 
-  StrCpy $AionUiRegistryInstallIsValid "0"
+  StrCpy $MuraRegistryInstallIsValid "0"
 
-  ReadRegStr $AionUiRegInstallLocation SHCTX "${INSTALL_REGISTRY_KEY}" "InstallLocation"
-  ReadRegStr $AionUiRegUninstallString SHCTX "${UNINSTALL_REGISTRY_KEY}" "UninstallString"
+  ReadRegStr $MuraRegInstallLocation SHCTX "${INSTALL_REGISTRY_KEY}" "InstallLocation"
+  ReadRegStr $MuraRegUninstallString SHCTX "${UNINSTALL_REGISTRY_KEY}" "UninstallString"
 
-  ${If} $AionUiRegInstallLocation == ""
-    !insertmacro AIONUI_LOG_EVENT "event=registry-heal phase=missing-install-location uninstallString=$AionUiRegUninstallString"
-    !insertmacro AIONUI_CLEAR_INSTALL_REGISTRY "missing-install-location"
+  ${If} $MuraRegInstallLocation == ""
+    !insertmacro MURA_LOG_EVENT "event=registry-heal phase=missing-install-location uninstallString=$MuraRegUninstallString"
+    !insertmacro MURA_CLEAR_INSTALL_REGISTRY "missing-install-location"
   ${Else}
-    StrCpy $AionUiRegInstallExe "$AionUiRegInstallLocation\${AIONUI_APP_EXECUTABLE_FILENAME}"
-    ${If} ${FileExists} "$AionUiRegInstallExe"
-      StrCpy $INSTDIR "$AionUiRegInstallLocation"
-      StrCpy $AionUiRegistryInstallIsValid "1"
-      !insertmacro AIONUI_LOG_EVENT "event=registry-heal phase=valid-install-location instDir=$INSTDIR uninstallString=$AionUiRegUninstallString"
+    StrCpy $MuraRegInstallExe "$MuraRegInstallLocation\${MURA_APP_EXECUTABLE_FILENAME}"
+    ${If} ${FileExists} "$MuraRegInstallExe"
+      StrCpy $INSTDIR "$MuraRegInstallLocation"
+      StrCpy $MuraRegistryInstallIsValid "1"
+      !insertmacro MURA_LOG_EVENT "event=registry-heal phase=valid-install-location instDir=$INSTDIR uninstallString=$MuraRegUninstallString"
     ${Else}
-      !insertmacro AIONUI_LOG_EVENT "event=registry-heal phase=stale-install-location installLocation=$AionUiRegInstallLocation uninstallString=$AionUiRegUninstallString"
-      !insertmacro AIONUI_CLEAR_INSTALL_REGISTRY "stale-install-location"
+      !insertmacro MURA_LOG_EVENT "event=registry-heal phase=stale-install-location installLocation=$MuraRegInstallLocation uninstallString=$MuraRegUninstallString"
+      !insertmacro MURA_CLEAR_INSTALL_REGISTRY "stale-install-location"
     ${EndIf}
   ${EndIf}
 !macroend
 
-!macro AIONUI_LOG_UNINSTALL_RESULT _ROOT_KEY _HAD_ERRORS
+!macro MURA_LOG_UNINSTALL_RESULT _ROOT_KEY _HAD_ERRORS
   nsExec::Exec `"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -Command "& { \
     $$ErrorActionPreference = 'SilentlyContinue'; \
-    $$log = '$AionUiSessionLogPath'; \
-    if (-not $$log) { $$log = Join-Path $$env:TEMP '${AIONUI_FALLBACK_LOG}' }; \
-    $$payload = [ordered]@{ schemaVersion = 1; ts = (Get-Date -Format o); session = '$AionUiSessionId'; version = '${VERSION}'; arch = '${AIONUI_TARGET_ARCH}'; updated = ('$AionUiIsUpdated' -eq '1'); instDir = '$INSTDIR'; event = 'uninstall-result'; root = '${_ROOT_KEY}'; launchErrors = '${_HAD_ERRORS}'; exitCode = '$R0' }; \
+    $$log = '$MuraSessionLogPath'; \
+    if (-not $$log) { $$log = Join-Path $$env:TEMP '${MURA_FALLBACK_LOG}' }; \
+    $$payload = [ordered]@{ schemaVersion = 1; ts = (Get-Date -Format o); session = '$MuraSessionId'; version = '${VERSION}'; arch = '${MURA_TARGET_ARCH}'; updated = ('$MuraIsUpdated' -eq '1'); instDir = '$INSTDIR'; event = 'uninstall-result'; root = '${_ROOT_KEY}'; launchErrors = '${_HAD_ERRORS}'; exitCode = '$R0' }; \
     Add-Content -LiteralPath $$log -Encoding UTF8 -Value ($$payload | ConvertTo-Json -Compress -Depth 8) \
   }"`
-  Pop $AionUiUninstallLogResult
+  Pop $MuraUninstallLogResult
 !macroend
 
-!macro AIONUI_HANDLE_UNINSTALL_RESULT _ROOT_KEY _LABEL_PREFIX
+!macro MURA_HANDLE_UNINSTALL_RESULT _ROOT_KEY _LABEL_PREFIX
   ${If} ${Errors}
-    StrCpy $AionUiUninstallHadErrors "1"
+    StrCpy $MuraUninstallHadErrors "1"
   ${Else}
-    StrCpy $AionUiUninstallHadErrors "0"
+    StrCpy $MuraUninstallHadErrors "0"
   ${EndIf}
 
-  !insertmacro AIONUI_LOG_UNINSTALL_RESULT "${_ROOT_KEY}" "$AionUiUninstallHadErrors"
+  !insertmacro MURA_LOG_UNINSTALL_RESULT "${_ROOT_KEY}" "$MuraUninstallHadErrors"
 
-  ${If} $AionUiUninstallHadErrors == "1"
+  ${If} $MuraUninstallHadErrors == "1"
     DetailPrint `Uninstall was not successful. Not able to launch uninstaller!`
     Return
   ${EndIf}
 
   ${If} $R0 != 0
       DetailPrint `Uninstall was not successful. Uninstaller error code: $R0.`
-      !insertmacro AIONUI_READ_LAST_INNER_FAILURE
-      ${If} $AionUiLockerList != ""
-        StrCpy $AionUiInnerFailureSummary "- Failure: previous uninstaller failed with exit code $R0$\r$\n- File or folder: $INSTDIR$\r$\n- Blocking process: $AionUiLockerList"
+      !insertmacro MURA_READ_LAST_INNER_FAILURE
+      ${If} $MuraLockerList != ""
+        StrCpy $MuraInnerFailureSummary "- Failure: previous uninstaller failed with exit code $R0$\r$\n- File or folder: $INSTDIR$\r$\n- Blocking process: $MuraLockerList"
       ${EndIf}
-      !insertmacro AIONUI_LOG_EVENT "event=old-uninstaller-failed action=report exitCode=$R0 lockers=$AionUiLockerList uninstallerDetail=$AionUiInnerFailureSummary"
-      ${If} $AionUiInnerRootCode != ""
-        !insertmacro AIONUI_FAIL_REPORTABLE_ROOTED_BILINGUAL_DIAGNOSTICS "$AionUiInnerRootCode" ${AIONUI_E_OLD_UNINSTALL_FAILED} "old-uninstaller exitCode=$R0 lockers=$AionUiLockerList uninstallerDetail=$AionUiInnerFailureSummary" "${AIONUI_MSG_OLD_UNINSTALL_FAILED_EN}" "${AIONUI_MSG_OLD_UNINSTALL_FAILED_ZH}" "${AIONUI_MSG_OLD_UNINSTALL_ACTION_EN}" "${AIONUI_MSG_OLD_UNINSTALL_ACTION_ZH}" "$AionUiInnerFailureSummary" "$AionUiInnerFailureSummary"
+      !insertmacro MURA_LOG_EVENT "event=old-uninstaller-failed action=report exitCode=$R0 lockers=$MuraLockerList uninstallerDetail=$MuraInnerFailureSummary"
+      ${If} $MuraInnerRootCode != ""
+        !insertmacro MURA_FAIL_REPORTABLE_ROOTED_BILINGUAL_DIAGNOSTICS "$MuraInnerRootCode" ${MURA_E_OLD_UNINSTALL_FAILED} "old-uninstaller exitCode=$R0 lockers=$MuraLockerList uninstallerDetail=$MuraInnerFailureSummary" "${MURA_MSG_OLD_UNINSTALL_FAILED_EN}" "${MURA_MSG_OLD_UNINSTALL_FAILED_ZH}" "${MURA_MSG_OLD_UNINSTALL_ACTION_EN}" "${MURA_MSG_OLD_UNINSTALL_ACTION_ZH}" "$MuraInnerFailureSummary" "$MuraInnerFailureSummary"
       ${Else}
-        !insertmacro AIONUI_FAIL_REPORTABLE_BILINGUAL_DIAGNOSTICS ${AIONUI_E_OLD_UNINSTALL_FAILED} "old-uninstaller exitCode=$R0 lockers=$AionUiLockerList uninstallerDetail=$AionUiInnerFailureSummary" "${AIONUI_MSG_OLD_UNINSTALL_FAILED_EN}" "${AIONUI_MSG_OLD_UNINSTALL_FAILED_ZH}" "${AIONUI_MSG_OLD_UNINSTALL_ACTION_EN}" "${AIONUI_MSG_OLD_UNINSTALL_ACTION_ZH}" "$AionUiInnerFailureSummary" "$AionUiInnerFailureSummary"
+        !insertmacro MURA_FAIL_REPORTABLE_BILINGUAL_DIAGNOSTICS ${MURA_E_OLD_UNINSTALL_FAILED} "old-uninstaller exitCode=$R0 lockers=$MuraLockerList uninstallerDetail=$MuraInnerFailureSummary" "${MURA_MSG_OLD_UNINSTALL_FAILED_EN}" "${MURA_MSG_OLD_UNINSTALL_FAILED_ZH}" "${MURA_MSG_OLD_UNINSTALL_ACTION_EN}" "${MURA_MSG_OLD_UNINSTALL_ACTION_ZH}" "$MuraInnerFailureSummary" "$MuraInnerFailureSummary"
       ${EndIf}
   ${EndIf}
 !macroend
 
 !macro customInit
-  !insertmacro AIONUI_HEAL_INSTALL_REGISTRY
-  ${If} $AionUiRegistryInstallIsValid == "1"
-    !insertmacro AIONUI_REPAIR_INSTALLED_UNINSTALLER
+  !insertmacro MURA_HEAL_INSTALL_REGISTRY
+  ${If} $MuraRegistryInstallIsValid == "1"
+    !insertmacro MURA_REPAIR_INSTALLED_UNINSTALLER
   ${EndIf}
 !macroend
 
 !macro customUnInstallCheck
-  !insertmacro AIONUI_HANDLE_UNINSTALL_RESULT "SHELL_CONTEXT" "shctx"
+  !insertmacro MURA_HANDLE_UNINSTALL_RESULT "SHELL_CONTEXT" "shctx"
 !macroend
 
 !macro customUnInstallCheckCurrentUser
-  !insertmacro AIONUI_HANDLE_UNINSTALL_RESULT "HKEY_CURRENT_USER" "hkcu"
+  !insertmacro MURA_HANDLE_UNINSTALL_RESULT "HKEY_CURRENT_USER" "hkcu"
 !macroend
 
 !endif
